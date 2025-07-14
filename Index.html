@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Note Guessing Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      background-color: #f0f0f0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    #question {
+      font-size: 24px;
+      margin: 15px 0;
+      font-weight: bold;
+      color: #333;
+    }
+    #note-input {
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 10px;
+      width: 100px;
+    }
+    #submit-btn, #quit-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      margin: 5px;
+    }
+    #submit-btn {
+      background-color: #28a745;
+    }
+    #submit-btn:hover {
+      background-color: #218838;
+    }
+    #quit-btn {
+      background-color: #dc3545;
+    }
+    #quit-btn:hover {
+      background-color: #c82333;
+    }
+    #feedback, #last-question-answer {
+      margin-top: 10px;
+      font-size: 16px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Note Guessing Game</h1>
+    <p>Guess the note that is Higher or Lower than the given note.</p>
+    <div id="question">Loading...</div>
+    <input id="note-input" placeholder="Enter note" maxlength="2" />
+    <br/>
+    <button id="submit-btn">Submit Guess</button>
+    <button id="quit-btn">Quit</button>
+    <div id="feedback"></div>
+    <div id="last-question-answer">Last q/a: None</div>
+  </div>
+
+  <script>
+    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    let currentNote;
+    let isNextNote;
+    let lastQADirection = null;
+    let lastQAGuess = null;
+    let lastQACorrect = null;
+
+    function startGame() {
+      currentNote = notes[Math.floor(Math.random() * notes.length)];
+      isNextNote = Math.random() < 0.5;
+
+      document.getElementById('question').innerText =
+        `Current note: ${currentNote} — ${isNextNote ? 'Higher' : 'Lower'}`;
+
+      document.getElementById('note-input').value = '';
+      document.getElementById('feedback').innerText = '';
+
+      if (lastQADirection === null) {
+        document.getElementById('last-question-answer').innerText = `Last q/a: None`;
+      } else {
+        const correctness = lastQACorrect ? '✔️ Correct' : '❌ Wrong';
+        document.getElementById('last-question-answer').innerText =
+          `Last q/a: ${lastQADirection} → ${lastQAGuess} ${correctness}`;
+      }
+    }
+
+    function getTargetNote(note) {
+      const index = notes.indexOf(note);
+      return isNextNote
+        ? notes[(index + 1) % notes.length]
+        : notes[(index - 1 + notes.length) % notes.length];
+    }
+
+    function checkGuess() {
+      const input = document.getElementById('note-input').value.trim().toUpperCase();
+      if (!notes.includes(input)) {
+        document.getElementById('feedback').innerText = 'Invalid note!';
+        return;
+      }
+
+      const correctNote = getTargetNote(currentNote);
+      const isCorrect = input === correctNote;
+
+      lastQADirection = isNextNote ? 'Higher' : 'Lower';
+      lastQAGuess = input;
+      lastQACorrect = isCorrect;
+
+      document.getElementById('feedback').innerText = isCorrect
+        ? '✅ Correct! Good job!'
+        : `❌ Wrong! The correct note is ${correctNote}.`;
+
+      setTimeout(startGame, 2000);
+    }
+
+    function quitGame() {
+      document.getElementById('question').innerText = 'Thanks for playing!';
+      document.getElementById('note-input').disabled = true;
+      document.getElementById('submit-btn').disabled = true;
+      document.getElementById('quit-btn').disabled = true;
+      document.getElementById('feedback').innerText = '';
+    }
+
+    document.getElementById('submit-btn').addEventListener('click', checkGuess);
+    document.getElementById('quit-btn').addEventListener('click', quitGame);
+    document.getElementById('note-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') checkGuess();
+    });
+
+    startGame();
+  </script>
+</body>
+</html>
